@@ -1,0 +1,37 @@
+# Training/evaluation output — these can be large; regenerate with train.py / evaluate.py
+runs/
+
+# Dataset images and labels — add manually if you want to version-control them
+data/train/images/*
+data/train/labels/*
+data/val/images/*
+data/val/labels/*
+data/test/images/*
+data/test/labels/*
+!data/**/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# PyTorch model weights (large binaries — store with Git LFS if needed)
+*.pt
+*.pth
+*.onnx

@@ -1,0 +1,17 @@
+# Dataset configuration for YOLOv8
+# Paths are relative to this file's location.
+# Roboflow exports this file automatically — replace the contents below
+# with the one from your Roboflow export if class order differs.
+
+path: .          # root of the dataset (this directory)
+train: train/images
+val:   val/images
+test:  test/images
+
+# Number of classes
+nc: 2
+
+# Class names — must match the order in your Roboflow label export
+names:
+  0: gap
+  1: drop
