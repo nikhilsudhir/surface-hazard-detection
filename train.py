@@ -55,6 +55,7 @@ def main():
         workers=args.workers,
         name=args.name,
         project="runs/train",
+        device=0,              # use GPU 0; set to "cpu" to force CPU
 
         # Optimiser — AdamW works well for small fine-tuning jobs
         optimizer="AdamW",

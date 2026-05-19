@@ -42,15 +42,26 @@ def print_results_table(metrics, class_names):
     """Pretty-print per-class and overall metrics to the console."""
     rows = []
 
+    # metrics arrays are only populated for classes seen in the eval split
+    seen = list(metrics.box.ap_class_index) if hasattr(metrics.box, "ap_class_index") else list(range(len(metrics.box.p)))
+    seen_map = {cls_idx: pos for pos, cls_idx in enumerate(seen)}
+
     # Per-class rows
     for i, name in enumerate(class_names):
+        if i not in seen_map:
+            rows.append({
+                "Class": name, "Precision": None, "Recall": None,
+                "F1": None, "mAP@0.5": None, "mAP@0.5:0.95": None,
+            })
+            continue
+        j = seen_map[i]
         rows.append({
             "Class":           name,
-            "Precision":       round(float(metrics.box.p[i]),  4),
-            "Recall":          round(float(metrics.box.r[i]),  4),
-            "F1":              round(float(metrics.box.f1[i]), 4),
-            "mAP@0.5":        round(float(metrics.box.ap50[i]), 4),
-            "mAP@0.5:0.95":   round(float(metrics.box.ap[i]),  4),
+            "Precision":       round(float(metrics.box.p[j]),  4),
+            "Recall":          round(float(metrics.box.r[j]),  4),
+            "F1":              round(float(metrics.box.f1[j]), 4),
+            "mAP@0.5":        round(float(metrics.box.ap50[j]), 4),
+            "mAP@0.5:0.95":   round(float(metrics.box.ap[j]),  4),
         })
 
     # Mean-over-classes row
@@ -125,15 +136,11 @@ def main():
             "Run train.py first, or pass --weights with the correct path."
         )
 
-    save_root = Path("runs/evaluate") / args.name
-    samples_dir = save_root / "samples"
-
     model = YOLO(str(weights_path))
     class_names = model.names  # dict {0: 'gap', 1: 'drop'}
 
     print(f"\nEvaluating: {weights_path}")
-    print(f"Dataset   : {args.data}")
-    print(f"Saving to : {save_root}\n")
+    print(f"Dataset   : {args.data}\n")
 
     # val() on the test split computes the full metric suite
     metrics = model.val(
@@ -147,6 +154,12 @@ def main():
         plots=True,      # writes confusion_matrix.png and PR_curve.png
         verbose=False,
     )
+
+    # Use the directory Ultralytics actually wrote to
+    save_root = Path(metrics.save_dir)
+    samples_dir = save_root / "samples"
+
+    print(f"Saving to : {save_root}\n")
 
     # Print and export the results table
     df = print_results_table(metrics, list(class_names.values()))
