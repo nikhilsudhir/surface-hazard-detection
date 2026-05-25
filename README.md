@@ -1,80 +1,97 @@
-# robodogThesis — YOLOv8 Gap & Drop Detector
+# surface-hazard-detection
 
-Fine-tuned YOLOv8 object detection model for identifying surface hazards (gaps and drops) in legged robot navigation. Built for a thesis project using the Unitree GO2 robot.
+YOLOv8s object detection model for identifying surface hazards in legged robot navigation. Trained on a custom real-world RGB image dataset covering seven hazard classes. Built as a UTS Bachelor of Engineering (Honours) capstone thesis project.
+
+---
+
+## Hazard classes
+
+`debris` · `gap` · `gutter` · `kerb` · `stairs` · `step` · `tree root`
+
+---
+
+## Results
+
+| Metric | Value |
+|--------|-------|
+| Best validation mAP@0.5 | **0.856** (epoch 47) |
+| Training stopped | Epoch 67 (early stopping, patience=20) |
+| Hardware | NVIDIA GeForce RTX 4070 12 GB |
+| Training time | ~4–5 minutes |
+
+### Per-class test mAP@0.5
+
+| Class | mAP@0.5 |
+|-------|---------|
+| Gap | 0.995 |
+| Stairs | 0.828 |
+| Step | 0.665 |
+| Gutter | 0.665 |
+| Debris | 0.197 |
+| Tree root | 0.000 |
+| Kerb | — (no test samples) |
+
+Training curves, confusion matrix, and PR curve are in [docs/thesis_figures/](docs/thesis_figures/).
 
 ---
 
 ## Project layout
 
 ```
-robodogThesis/
+surface-hazard-detection/
+├── train.py                          ← fine-tune YOLOv8s
+├── evaluate.py                       ← evaluate on test set
+├── predict.py                        ← inference on new images
+├── requirements.txt
 ├── data/
-│   ├── train/images/      ← training images
-│   ├── train/labels/      ← training YOLO labels (.txt)
-│   ├── val/images/        ← validation images
-│   ├── val/labels/
-│   ├── test/images/       ← held-out test images
-│   ├── test/labels/
-│   └── data.yaml          ← dataset config (paths + class names)
+│   ├── data.yaml                     ← dataset config
+│   ├── train/images/  (411 images)
+│   ├── train/labels/
+│   ├── valid/images/  (19 images)
+│   ├── valid/labels/
+│   ├── test/images/   (9 images)
+│   └── test/labels/
 ├── runs/
-│   ├── train/             ← training artefacts (weights, metric plots)
-│   ├── evaluate/          ← confusion matrix, PR curves, sample images
-│   └── predict/           ← annotated inference output
-├── train.py               ← fine-tune YOLOv8
-├── evaluate.py            ← evaluate on test set
-├── predict.py             ← inference on new images
-└── requirements.txt
+│   └── detect/runs/train/gap_drop_v1/
+│       └── weights/
+│           └── best.pt               ← best model weights (22 MB)
+└── docs/
+    └── thesis_figures/               ← key plots for thesis reference
+        ├── results.png
+        ├── confusion_matrix_normalized.png
+        ├── PR_curve.png
+        └── val_batch0_pred.jpg
 ```
 
 ---
 
-## 1 — Install dependencies
+## Dataset
 
-### CPU (any machine)
+Exported from Roboflow in YOLOv8 format. 411 training images (includes augmentation), 19 validation, 9 test — collected on a real outdoor urban campus environment.
+
+- **Roboflow project:** [gap-and-drop-and-debris-detect v2](https://universe.roboflow.com/nikhils-workspace-8h7hl/gap-and-drop-and-debris-detect/dataset/2)
+- **License:** CC BY 4.0
+
+---
+
+## Setup
+
+**Python 3.9 – 3.12.**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### GPU (CUDA 12.x — recommended for training)
-
-Replace the `torch` and `torchvision` lines with the CUDA build before installing:
+For GPU training (CUDA 12.x), install the CUDA-enabled PyTorch build first:
 
 ```bash
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
 ```
 
-> **Python version:** 3.9 – 3.12 tested.
-
 ---
 
-## 2 — Drop in your Roboflow dataset
-
-1. Export your dataset from Roboflow → **YOLOv8 format**.
-2. Unzip the export. You'll get `train/`, `valid/`, `test/`, and `data.yaml`.
-3. Copy the folders into `data/` (rename `valid/` → `val/` if needed):
-
-```
-data/train/images/   ← ~600 images
-data/train/labels/   ← matching .txt files
-data/val/images/     ← ~100 images
-data/val/labels/
-data/test/images/    ← ~75 images
-data/test/labels/
-```
-
-4. Replace `data/data.yaml` with the one from the Roboflow export **or** verify that the class names and order match:
-
-```yaml
-names:
-  0: gap
-  1: drop
-```
-
----
-
-## 3 — Train
+## Train
 
 ```bash
 python train.py
@@ -82,94 +99,44 @@ python train.py
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--epochs` | 100 | Max training epochs (early stopping at patience=20) |
-| `--batch` | 16 | Batch size; reduce to 8 if you hit OOM |
-| `--imgsz` | 640 | Input resolution in pixels |
+| `--epochs` | 100 | Max epochs (early stopping at patience=20) |
+| `--batch` | 16 | Batch size; reduce to 8 if OOM |
+| `--imgsz` | 640 | Input resolution (pixels) |
 | `--name` | `gap_drop_v1` | Sub-folder name inside `runs/train/` |
-| `--model` | `yolov8s.pt` | Starting checkpoint (downloaded automatically) |
+| `--model` | `yolov8s.pt` | Starting checkpoint (auto-downloaded) |
 
-Training produces:
-
-```
-runs/train/gap_drop_v1/
-├── weights/
-│   ├── best.pt     ← best mAP checkpoint  ← use this for eval/predict
-│   └── last.pt     ← final epoch checkpoint
-├── results.csv     ← epoch-by-epoch metrics
-├── results.png     ← metric curves plot
-├── confusion_matrix.png
-└── PR_curve.png
-```
+Outputs saved to `runs/train/<name>/weights/best.pt`.
 
 ---
 
-## 4 — Evaluate on the test set
+## Evaluate
 
 ```bash
 python evaluate.py
 ```
 
-Pass `--weights` if your run has a different name:
+Or with a custom weights path:
 
 ```bash
-python evaluate.py --weights runs/train/gap_drop_v1/weights/best.pt
-```
-
-Output printed to console:
-
-```
------------------------------------------------------------------
-  Detection results on test set
------------------------------------------------------------------
-             Precision  Recall    F1  mAP@0.5  mAP@0.5:0.95
-Class
-gap              0.89    0.86  0.875     0.91          0.63
-drop             0.92    0.88  0.900     0.93          0.67
-ALL (mean)       0.91    0.87  0.888     0.92          0.65
------------------------------------------------------------------
-```
-
-Saved artefacts:
-
-```
-runs/evaluate/test_eval/
-├── confusion_matrix.png     ← true/false positive breakdown per class
-├── PR_curve.png             ← precision–recall curves per class
-├── metrics.csv              ← same table as above, machine-readable
-└── samples/                 ← up to 20 annotated test images
+python evaluate.py --weights runs/detect/runs/train/gap_drop_v1/weights/best.pt
 ```
 
 ---
 
-## 5 — Predict on new images
+## Predict
 
 ```bash
 # Single image
-python predict.py --source path/to/photo.jpg
+python predict.py --source path/to/image.jpg
 
-# Folder of images
+# Folder
 python predict.py --source path/to/images/
 
-# With a custom confidence threshold
-python predict.py --source path/to/photo.jpg --conf 0.4
+# Custom confidence threshold
+python predict.py --source path/to/image.jpg --conf 0.4
 ```
 
-Annotated images are saved to `runs/predict/results/`. Add `--show` to display results in a pop-up window.
-
----
-
-## 6 — Output file reference
-
-| File | What it contains |
-|------|-----------------|
-| `best.pt` | Best model weights by validation mAP — use for eval and deployment |
-| `last.pt` | Weights from the final epoch — useful if early stopping triggered too soon |
-| `results.csv` | Epoch-level: box loss, cls loss, precision, recall, mAP@0.5, mAP@0.5:0.95 |
-| `results.png` | Visual plot of the above curves |
-| `confusion_matrix.png` | How often each class was correctly/incorrectly predicted |
-| `PR_curve.png` | Precision–recall trade-off per class at varying confidence thresholds |
-| `metrics.csv` | Final test-set metrics table exported by evaluate.py |
-| `samples/` | Annotated test images showing model predictions in context |
+Annotated output is saved to `runs/predict/results/`.
 
 ---
 
@@ -179,7 +146,8 @@ Annotated images are saved to `runs/predict/results/`. Add `--show` to display r
 |----------|-------|
 | Architecture | YOLOv8s |
 | Pre-training | COCO (80 classes) |
-| Fine-tuning classes | gap (0), drop (1) |
+| Fine-tuning classes | 7 (see above) |
 | Input resolution | 640 × 640 px |
-| Optimiser | AdamW |
+| Optimiser | AdamW, lr0=0.001, lrf=0.01 |
 | Early stopping patience | 20 epochs |
+| Augmentation | Mosaic, horizontal flip, HSV jitter |

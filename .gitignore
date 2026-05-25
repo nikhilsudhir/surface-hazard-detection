@@ -1,4 +1,5 @@
-# Training/evaluation output — these can be large; regenerate with train.py / evaluate.py
+# Training/evaluation output — regenerate with train.py / evaluate.py
+# (best.pt and thesis figures are tracked explicitly)
 runs/
 
 # Python
@@ -19,7 +20,10 @@ env/
 # macOS
 .DS_Store
 
-# PyTorch model weights (large binaries — store with Git LFS if needed)
+# PyTorch model weights (large binaries)
 *.pt
 *.pth
 *.onnx
+
+# Ultralytics label cache files
+*.cache
