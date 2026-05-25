@@ -1,8 +1,8 @@
 
-gap and drop and debris detect - v1 2026-05-20 1:09am
+gap and drop and debris detect - v2 2026-05-22 1:30pm
 ==============================
 
-This dataset was exported via roboflow.com on May 19, 2026 at 3:10 PM GMT
+This dataset was exported via roboflow.com on May 22, 2026 at 3:31 AM GMT
 
 Roboflow is an end-to-end computer vision platform that helps you
 * collaborate with your team on computer vision projects
@@ -17,7 +17,7 @@ visit https://github.com/roboflow/notebooks
 
 To find over 100k other datasets and pre-trained models, visit https://universe.roboflow.com
 
-The dataset includes 321 images.
+The dataset includes 439 images.
 Gap-and-drop-and-debris-detect are annotated in YOLOv8 format.
 
 The following pre-processing was applied to each image:
@@ -28,6 +28,7 @@ The following augmentation was applied to create 3 versions of each source image
 * 50% probability of horizontal flip
 * Random rotation of between -15 and +15 degrees
 * Random brigthness adjustment of between -15 and +15 percent
+* Random exposure adjustment of between -10 and +10 percent
 * Random Gaussian blur of between 0 and 1.5 pixels
 
 

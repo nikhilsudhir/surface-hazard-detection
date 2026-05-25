@@ -8,6 +8,6 @@ names: ['debris', 'gap', 'gutter', 'kerb', 'stairs', 'step', 'tree root']
 roboflow:
   workspace: nikhils-workspace-8h7hl
   project: gap-and-drop-and-debris-detect
-  version: 1
+  version: 2
   license: CC BY 4.0
-  url: https://universe.roboflow.com/nikhils-workspace-8h7hl/gap-and-drop-and-debris-detect/dataset/1
+  url: https://universe.roboflow.com/nikhils-workspace-8h7hl/gap-and-drop-and-debris-detect/dataset/2
