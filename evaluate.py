@@ -39,7 +39,6 @@ def parse_args():
 
 
 def print_results_table(metrics, class_names):
-    """Pretty-print per-class and overall metrics to the console."""
     rows = []
 
     # metrics arrays are only populated for classes seen in the eval split
@@ -85,7 +84,7 @@ def print_results_table(metrics, class_names):
 
 
 def save_sample_images(model, data_yaml, save_dir, n_samples, conf, iou, imgsz):
-    """Run inference on test images and save annotated examples."""
+    # Run inference on test images and save annotated examples.
     import yaml
 
     save_dir.mkdir(parents=True, exist_ok=True)

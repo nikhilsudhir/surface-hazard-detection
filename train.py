@@ -81,7 +81,7 @@ def main():
         verbose=True,
     )
 
-    # Report where the artefacts landed
+    # Final report where the artefacts landed
     best_weights = Path("runs/train") / args.name / "weights" / "best.pt"
     print(f"\nTraining complete.")
     print(f"Best weights saved to: {best_weights}")

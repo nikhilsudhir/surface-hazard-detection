@@ -7,8 +7,6 @@ runs/predict/<name>/ and also displayed if --show is passed.
 Usage:
     python predict.py --source path/to/image.jpg
     python predict.py --source path/to/folder/
-    python predict.py --source path/to/video.mp4 --show
-    python predict.py --source path/to/folder/ --conf 0.4 --weights custom.pt
 """
 
 import argparse
@@ -86,10 +84,10 @@ def main():
         conf=args.conf,
         iou=args.iou,
         imgsz=args.imgsz,
-        save=True,           # write annotated images to disk
-        save_txt=False,      # set True to also save YOLO-format label files
-        save_conf=True,      # include confidence scores in saved labels
-        show=args.show,      # pop up a window per image if requested
+        save=True,
+        save_txt=False,
+        save_conf=True,
+        show=args.show,
         project="runs/predict",
         name=args.name,
         verbose=True,
@@ -103,21 +101,6 @@ def main():
     print(f"  Images processed : {len(results)}")
     print(f"  Total detections : {total_detections}")
     print(f"  Saved to         : {out_dir}/")
-
-    # Print a per-image breakdown when there aren't too many images
-    if len(results) <= 20:
-        print()
-        for r in results:
-            img_name = Path(r.path).name
-            n = len(r.boxes)
-            if n == 0:
-                print(f"  {img_name}: no detections")
-            else:
-                labels = [model.names[int(c)] for c in r.boxes.cls.cpu()]
-                confs  = [f"{c:.2f}" for c in r.boxes.conf.cpu()]
-                pairs  = ", ".join(f"{l}({c})" for l, c in zip(labels, confs))
-                print(f"  {img_name}: {pairs}")
-
 
 if __name__ == "__main__":
     main()
