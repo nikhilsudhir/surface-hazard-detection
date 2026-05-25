@@ -1,15 +1,6 @@
 # Training/evaluation output — these can be large; regenerate with train.py / evaluate.py
 runs/
 
-# Dataset images and labels — add manually if you want to version-control them
-data/train/images/*
-data/train/labels/*
-data/val/images/*
-data/val/labels/*
-data/test/images/*
-data/test/labels/*
-!data/**/.gitkeep
-
 # Python
 __pycache__/
 *.py[cod]
@@ -24,9 +15,6 @@ build/
 venv/
 .venv/
 env/
-
-# Jupyter
-.ipynb_checkpoints/
 
 # macOS
 .DS_Store
